@@ -1,6 +1,7 @@
 import React from 'react';
-import { Search, X, Zap, ShieldCheck, Star, Award, TrendingUp } from 'lucide-react';
-import { ToolCategory } from '../types';
+import { Zap, ShieldCheck, Star, Award, TrendingUp } from 'lucide-react';
+import { AITool, ToolCategory } from '../types';
+import { SearchBarWithSuggestions } from './SearchBarWithSuggestions';
 
 interface HeroProps {
   searchQuery: string;
@@ -9,6 +10,9 @@ interface HeroProps {
   onCategorySelect: (category: ToolCategory) => void;
   categories: ToolCategory[];
   totalResults: number;
+  allTools: AITool[];
+  onSelectTool?: (tool: AITool) => void;
+  onViewAllResults?: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -18,6 +22,9 @@ export const Hero: React.FC<HeroProps> = ({
   onCategorySelect,
   categories,
   totalResults,
+  allTools,
+  onSelectTool,
+  onViewAllResults,
 }) => {
   return (
     <section id="hero" className="relative pt-12 pb-16 md:pt-20 md:pb-24 overflow-hidden">
@@ -33,7 +40,7 @@ export const Hero: React.FC<HeroProps> = ({
           <span className="flex h-2 w-2 rounded-full bg-cyan-400 animate-pulse" />
           <span className="font-semibold uppercase tracking-wider text-[11px] text-cyan-400">2026 Annual AI Index</span>
           <span className="text-slate-500">•</span>
-          <span className="text-slate-300">250+ Benchmarked Platforms</span>
+          <span className="text-slate-300">{allTools.length}+ Benchmarked Platforms</span>
         </div>
 
         {/* Catchy headline targeting US audiences */}
@@ -48,39 +55,16 @@ export const Hero: React.FC<HeroProps> = ({
           Cut through the hype with unbiased performance benchmarks, verified pricing tiers, and deep-dive technical reviews designed for modern builders, creators, and US teams.
         </p>
 
-        {/* Search Bar Element */}
-        <div className="max-w-2xl mx-auto relative mb-8 group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-600 rounded-2xl blur-sm opacity-40 group-hover:opacity-75 transition duration-300 -z-10" />
-          
-          <div className="relative flex items-center bg-[#0d1222] border border-slate-700/80 group-focus-within:border-cyan-400/80 rounded-2xl px-4 py-3.5 shadow-2xl transition-all">
-            <Search className="w-5 h-5 text-slate-400 mr-3 flex-shrink-0 group-focus-within:text-cyan-400 transition-colors" />
-            
-            <input
-              type="text"
-              id="ai-tool-search-input"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search by name, category, or features (e.g. 'Claude', 'Video', 'Coding')..."
-              className="w-full bg-transparent text-white placeholder-slate-400 text-sm sm:text-base focus:outline-none"
-            />
-
-            {searchQuery && (
-              <button
-                onClick={() => onSearchChange('')}
-                className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition-colors mr-2 cursor-pointer"
-                title="Clear search"
-                id="clear-search-btn"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-
-            <div className="hidden sm:flex items-center gap-1.5 pl-2 border-l border-slate-700 text-[11px] text-slate-400 font-mono flex-shrink-0">
-              <span className="bg-slate-800/80 px-2 py-1 rounded text-slate-300">
-                {totalResults} {totalResults === 1 ? 'match' : 'matches'}
-              </span>
-            </div>
-          </div>
+        {/* Real-time Search Bar with Instant Live Auto-Suggestions Dropdown */}
+        <div className="mb-8">
+          <SearchBarWithSuggestions
+            searchQuery={searchQuery}
+            onSearchChange={onSearchChange}
+            allTools={allTools}
+            totalResults={totalResults}
+            onSelectTool={onSelectTool}
+            onViewAllResults={onViewAllResults}
+          />
         </div>
 
         {/* Quick Pill Filters */}

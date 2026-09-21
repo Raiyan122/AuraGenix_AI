@@ -1,18 +1,30 @@
 import React, { useState } from 'react';
-import { Sparkles, PlusCircle, Menu, X } from 'lucide-react';
+import { Sparkles, PlusCircle, Menu, X, Search } from 'lucide-react';
 
 interface NavbarProps {
   onSubmitToolClick: () => void;
+  onNavigateHome?: (sectionId?: string) => void;
+  onSearchClick?: () => void;
+  currentView?: 'home' | 'tool';
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onSubmitToolClick }) => {
+export const Navbar: React.FC<NavbarProps> = ({ 
+  onSubmitToolClick, 
+  onNavigateHome,
+  onSearchClick,
+  currentView = 'home' 
+}) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const scrollToSection = (id: string) => {
+  const handleNavClick = (sectionId: string) => {
     setMobileMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    if (onNavigateHome) {
+      onNavigateHome(sectionId);
+    } else {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
@@ -22,9 +34,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onSubmitToolClick }) => {
         <div className="flex items-center justify-between h-20">
           
           {/* Logo on the left */}
-          <a
-            href="#"
-            className="flex items-center gap-3 group focus:outline-none"
+          <button
+            onClick={() => handleNavClick('hero')}
+            className="flex items-center gap-3 group focus:outline-none text-left cursor-pointer"
             id="logo-link"
           >
             <div className="relative flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 p-[1px] shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-all">
@@ -40,40 +52,42 @@ export const Navbar: React.FC<NavbarProps> = ({ onSubmitToolClick }) => {
                 Verified Tech Reviews 2026
               </span>
             </div>
-          </a>
+          </button>
 
           {/* Desktop Navigation links on the right */}
           <nav className="hidden md:flex items-center gap-8">
             <button
-              onClick={() => scrollToSection('hero')}
-              className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
+              onClick={() => handleNavClick('hero')}
+              className={`text-sm font-medium transition-colors cursor-pointer ${
+                currentView === 'home' ? 'text-cyan-400 font-semibold' : 'text-slate-300 hover:text-cyan-400'
+              }`}
               id="nav-home"
             >
-              Home
+              Directory Home
             </button>
             <button
-              onClick={() => scrollToSection('tools-grid')}
+              onClick={() => handleNavClick('tools-grid')}
               className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
               id="nav-top-tools"
             >
               Top AI Tools
             </button>
             <button
-              onClick={() => scrollToSection('categories-section')}
+              onClick={() => handleNavClick('categories-section')}
               className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
               id="nav-categories"
             >
               Categories
             </button>
             <button
-              onClick={() => scrollToSection('pricing-guide')}
+              onClick={() => handleNavClick('pricing-guide')}
               className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
               id="nav-pricing"
             >
               Pricing
             </button>
             <button
-              onClick={() => scrollToSection('ai-insights')}
+              onClick={() => handleNavClick('ai-insights')}
               className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
               id="nav-blog"
             >
@@ -83,6 +97,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onSubmitToolClick }) => {
 
           {/* Right Action CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            {onSearchClick && (
+              <button
+                type="button"
+                onClick={onSearchClick}
+                className="inline-flex items-center gap-2 px-3 py-2 text-xs font-medium text-slate-300 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/40 rounded-xl transition-all cursor-pointer"
+                id="nav-quick-search-btn"
+                title="Search AI tools (/)"
+              >
+                <Search className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Search</span>
+                <kbd className="hidden lg:inline-block px-1.5 py-0.5 bg-slate-800 text-[10px] font-mono text-slate-400 border border-slate-700 rounded">
+                  /
+                </kbd>
+              </button>
+            )}
+
             <button
               onClick={onSubmitToolClick}
               className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 rounded-xl shadow-md shadow-blue-500/25 hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all cursor-pointer"
@@ -118,31 +148,31 @@ export const Navbar: React.FC<NavbarProps> = ({ onSubmitToolClick }) => {
       {mobileMenuOpen && (
         <div className="md:hidden border-b border-slate-800 bg-[#070913]/95 backdrop-blur-xl px-4 pt-3 pb-6 space-y-3">
           <button
-            onClick={() => scrollToSection('hero')}
+            onClick={() => handleNavClick('hero')}
             className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
           >
-            Home
+            Directory Home
           </button>
           <button
-            onClick={() => scrollToSection('tools-grid')}
+            onClick={() => handleNavClick('tools-grid')}
             className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
           >
             Top AI Tools
           </button>
           <button
-            onClick={() => scrollToSection('categories-section')}
+            onClick={() => handleNavClick('categories-section')}
             className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
           >
             Categories
           </button>
           <button
-            onClick={() => scrollToSection('pricing-guide')}
+            onClick={() => handleNavClick('pricing-guide')}
             className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
           >
             Pricing
           </button>
           <button
-            onClick={() => scrollToSection('ai-insights')}
+            onClick={() => handleNavClick('ai-insights')}
             className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
           >
             Blog

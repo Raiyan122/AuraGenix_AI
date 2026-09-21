@@ -11,24 +11,32 @@ export type ToolCategory =
   | 'Design & 3D'
   | 'Research & Data';
 
-export type PricingType = 'All' | 'Free' | 'Freemium' | 'Paid';
+export type PricingType = 'All' | 'Free' | 'Freemium' | 'Paid' | 'Open Source';
 
 export interface AITool {
   id: string;
   name: string;
   category: Exclude<ToolCategory, 'All'>;
+  // Core fields requested
+  shortTagline: string;
+  detailedDescription: string;
+  officialWebsiteUrl: string;
+  logoUrl: string;
+  pricingModel: 'Free' | 'Freemium' | 'Paid' | 'Open Source';
+  rating: number;
+  
+  // Extended fields for rich review modal & compatibility
   shortDescription: string;
   fullReview: string;
-  rating: number;
-  reviewCount: number;
-  pricing: 'Free' | 'Freemium' | 'Paid';
+  websiteUrl: string;
+  pricing: 'Free' | 'Freemium' | 'Paid' | 'Open Source';
   pricingStarting: string;
+  reviewCount: number;
   badge?: string;
   tags: string[];
   pros: string[];
   cons: string[];
   bestFor: string;
-  websiteUrl: string;
   verifiedYear: number;
 }
 

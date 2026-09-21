@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { X, Star, CheckCircle2, XCircle, ExternalLink, ShieldCheck, Zap, Sparkles } from 'lucide-react';
 import { AITool } from '../types';
+import { ToolLogo } from './ToolLogo';
 
 interface ReviewModalProps {
   tool: AITool | null;
@@ -45,9 +46,17 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({ tool, onClose }) => {
               )}
             </div>
             
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              {tool.name}
-            </h2>
+            <div className="flex items-center gap-3">
+              <ToolLogo
+                toolName={tool.name}
+                websiteUrl={tool.officialWebsiteUrl || tool.websiteUrl}
+                customLogoUrl={tool.logoUrl}
+                size="md"
+              />
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+                {tool.name}
+              </h2>
+            </div>
             
             <div className="flex items-center gap-3 mt-2">
               <div className="flex items-center text-amber-400">

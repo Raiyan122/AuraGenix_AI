@@ -4,7 +4,7 @@ import {
   ExternalLink, 
   ArrowRight, 
   CheckCircle2, 
-  Bot,
+  Bot, 
   Code2, 
   PenTool, 
   Sparkles, 
@@ -13,13 +13,16 @@ import {
   Layers, 
   SearchCheck, 
   Box, 
-  Database
+  Database 
 } from 'lucide-react';
 import { AITool, ToolCategory } from '../types';
+import { HighlightMatch } from './HighlightMatch';
+import { ToolLogo } from './ToolLogo';
 
 interface ToolCardProps {
   tool: AITool;
   onReadReview: (tool: AITool) => void;
+  searchQuery?: string;
 }
 
 // Category visual theme mapper
@@ -92,7 +95,7 @@ const getToolInitials = (name: string) => {
   return name.slice(0, 2).toUpperCase();
 };
 
-export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview }) => {
+export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview, searchQuery }) => {
   const theme = getCategoryTheme(tool.category);
   const IconComponent = theme.icon;
   const initials = getToolInitials(tool.name);
@@ -102,7 +105,8 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview }) => {
 
   return (
     <article 
-      className="group relative flex flex-col justify-between rounded-2xl bg-[#0c1122]/90 border border-slate-800/90 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 overflow-hidden"
+      onClick={() => onReadReview(tool)}
+      className="group relative flex flex-col justify-between rounded-2xl bg-[#0c1122]/90 border border-slate-800/90 hover:border-cyan-500/50 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 overflow-hidden cursor-pointer"
       id={`tool-card-${tool.id}`}
     >
       {/* Top hover subtle highlight */}
@@ -114,15 +118,22 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview }) => {
         {/* Header row: Icon/Initials, Name, Category & Pricing Badge */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
-            {/* Tool Logo / Icon placeholder with initials */}
-            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${theme.bg} border flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-md group-hover:scale-105 transition-transform`}>
-              <span className="tracking-tight">{initials}</span>
-            </div>
+            {/* Tool Logo with dynamic favicon resolution & fallback */}
+            <ToolLogo
+              toolName={tool.name}
+              websiteUrl={tool.officialWebsiteUrl || tool.websiteUrl}
+              customLogoUrl={tool.logoUrl}
+              size="md"
+            />
 
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
-                  {tool.name}
+                  {searchQuery ? (
+                    <HighlightMatch text={tool.name} query={searchQuery} />
+                  ) : (
+                    tool.name
+                  )}
                 </h3>
                 {tool.badge && (
                   <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 rounded-full">
@@ -210,6 +221,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview }) => {
           href={tool.websiteUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
           className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-cyan-300 transition-colors py-2"
           title={`Visit ${tool.name} official website`}
         >
@@ -219,11 +231,14 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview }) => {
 
         {/* Read Full Review Button */}
         <button
-          onClick={() => onReadReview(tool)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onReadReview(tool);
+          }}
           id={`read-review-btn-${tool.id}`}
           className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-slate-800/90 hover:bg-gradient-to-r hover:from-cyan-500 hover:to-purple-600 border border-slate-700 hover:border-cyan-400/50 rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-cyan-500/20 group/btn"
         >
-          <span>Read Full Review</span>
+          <span>Read In-Depth Review</span>
           <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
         </button>
       </div>
