@@ -5,12 +5,14 @@ interface FooterProps {
   onOpenPrivacy: () => void;
   onOpenTerms: () => void;
   onOpenContact: () => void;
+  onOpenReportIssue?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenPrivacy,
   onOpenTerms,
   onOpenContact,
+  onOpenReportIssue,
 }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
@@ -61,7 +63,8 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2.5 text-xs text-slate-400">
               <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Coding &amp; LLM IDEs</a></li>
               <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Generative Video &amp; VFX</a></li>
-              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">AI Copywriting &amp; Content</a></li>
+              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Legal AI &amp; Contracts</a></li>
+              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Finance AI &amp; Quant Alpha</a></li>
               <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Photorealistic Image Gen</a></li>
               <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">SEO &amp; Growth Intelligence</a></li>
             </ul>
@@ -86,6 +89,14 @@ export const Footer: React.FC<FooterProps> = ({
               <li>
                 <button onClick={onOpenContact} className="hover:text-cyan-300 transition-colors text-left cursor-pointer">
                   Contact Us
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={onOpenReportIssue || onOpenContact} 
+                  className="hover:text-cyan-300 transition-colors text-left cursor-pointer text-amber-400/90 hover:text-amber-300 flex items-center gap-1"
+                >
+                  <span>Report an Issue</span>
                 </button>
               </li>
               <li>
@@ -154,6 +165,10 @@ export const Footer: React.FC<FooterProps> = ({
             <span>•</span>
             <button onClick={onOpenContact} className="hover:text-slate-300 transition-colors cursor-pointer">
               Contact Us
+            </button>
+            <span>•</span>
+            <button onClick={onOpenReportIssue || onOpenContact} className="hover:text-amber-300 transition-colors cursor-pointer">
+              Report an Issue
             </button>
           </div>
         </div>

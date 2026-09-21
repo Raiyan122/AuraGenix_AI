@@ -333,6 +333,66 @@ export function getToolFeatures(tool: AITool): ToolFeature[] {
         description: 'Exports reproducible Jupyter notebooks with step-by-step mathematical justifications for all calculated figures.',
         badge: 'Audit Ready'
       }
+    ],
+    'Legal AI': [
+      {
+        title: 'Deep Contract Review & Redlining Engine',
+        description: 'Analyzes master services agreements, NDAs, and employment contracts against custom playbook rules, flagging non-standard indemnities.',
+        badge: 'Contract AI'
+      },
+      {
+        title: 'Precedent Discovery & Case Law Grounding',
+        description: 'Searches federal, state, and appellate case law repositories with verified bluebook legal citations and Shepardizing validation.',
+        badge: 'Case Law'
+      },
+      {
+        title: 'Clause Extraction & Compliance Risk Scoring',
+        description: 'Extracts limitation of liability, non-competes, and termination clauses across thousands of legacy agreements simultaneously.',
+        badge: 'Risk Audit'
+      },
+      {
+        title: 'Regulatory & Statute Impact Tracking',
+        description: 'Monitors real-time federal and global statutory updates (GDPR, EU AI Act, SEC rules) to surface corporate compliance exposures.',
+      },
+      {
+        title: 'Legal Memorandum & Brief Drafting',
+        description: 'Drafts substantive motion briefs, client opinion letters, and dispute responses supported by primary statutory authority.',
+      },
+      {
+        title: 'Strict Attorney-Client Privilege & Air-Gapped Vaults',
+        description: 'Zero data retention architecture, SOC2 Type II, and ISO 27001 certified with air-gapped LLM deployment models for law firms.',
+        badge: 'Air Gapped'
+      }
+    ],
+    'Finance AI': [
+      {
+        title: 'Automated 10-K/10-Q Financial Model Extraction',
+        description: 'Parses SEC filings, balance sheets, cash flow statements, and MD&A disclosures into dynamic Excel financial models.',
+        badge: 'SEC Parser'
+      },
+      {
+        title: 'Real-Time Market Sentiment & Earnings Call Analysis',
+        description: 'Transcribes corporate quarterly earnings calls with sentiment tone analysis, executive hedging indicators, and forward guidance tracking.',
+        badge: 'Alpha Signals'
+      },
+      {
+        title: 'Algorithmic Risk & Portfolio Stress Testing',
+        description: 'Simulates extreme macroeconomic shocks (interest rate hikes, currency devaluations, liquidity squeezes) against asset portfolios.',
+        badge: 'Stress Test'
+      },
+      {
+        title: 'Automated Audit & Fraud Anomaly Detection',
+        description: 'Scans general ledger journal entries and vendor invoicing streams to catch fraudulent anomalies and tax compliance errors.',
+      },
+      {
+        title: 'Valuation & Discounted Cash Flow (DCF) Automation',
+        description: 'Builds comprehensive DCF, precedent transaction, and comparable company (Comps) valuation models in minutes.',
+      },
+      {
+        title: 'Bank-Grade FINRA & SEC Compliance Logging',
+        description: 'Enforces immutable audit trails, encryption at rest, and strict data governance compliant with financial regulatory authorities.',
+        badge: 'FINRA Compliant'
+      }
     ]
   };
 
@@ -454,6 +514,52 @@ export function getToolUseCases(tool: AITool): UseCaseScenario[] {
         role: 'Data Scientists & Product Managers',
         description: `Query internal metrics warehouses using conversational natural language, producing instant cohort heatmaps and predictive churn charts.`,
         benefit: 'Empowers non-technical team members with instant data access.'
+      }
+    ];
+  }
+
+  if (cat === 'Legal AI') {
+    return [
+      {
+        title: 'High-Volume Commercial Contract Redlining',
+        role: 'In-House Counsel & Corporate Legal Teams',
+        description: `Compare counterparty redlines against standard fallback clauses in seconds, flagging unacceptable indemnities or IP assignments.`,
+        benefit: 'Reduces contract negotiation turnaround from 10 days to under 4 hours.'
+      },
+      {
+        title: 'Complex Litigation & Discovery Synthesis',
+        role: 'Litigation Attorneys & Paralegals',
+        description: `Search millions of subpoenaed emails, depositions, and exhibits using semantic concepts, generating chronological case timelines with citation pinpoints.`,
+        benefit: 'Drastically cuts billable hours spent on manual document review.'
+      },
+      {
+        title: 'M&A Due Diligence & Regulatory Compliance',
+        role: 'Corporate Associates & Compliance Officers',
+        description: `Audit change-of-control covenants, employment non-competes, and regulatory licenses across hundreds of acquisition targets.`,
+        benefit: 'Minimizes post-transaction liabilities and regulatory compliance fines.'
+      }
+    ];
+  }
+
+  if (cat === 'Finance AI') {
+    return [
+      {
+        title: 'Earnings Call & Financial Statement Modeling',
+        role: 'Equity Research & Investment Analysts',
+        description: `Automatically extract revenue segmentation, operating margins, and executive commentary from quarterly filings into linked valuation spreadsheets.`,
+        benefit: 'Saves 15+ hours per earnings season per coverage company.'
+      },
+      {
+        title: 'Quantitative Risk & Portfolio Hedging',
+        role: 'Hedge Fund Managers & Risk Officers',
+        description: `Run probabilistic Monte Carlo simulations and macroeconomic stress tests to dynamically hedge credit and rate exposures.`,
+        benefit: 'Protects assets during volatile market drawdowns with automated triggers.'
+      },
+      {
+        title: 'General Ledger Audit & Invoice Anomaly Detection',
+        role: 'CFOs, Controllers & Forensic Accountants',
+        description: `Continuously audit accounts payable, corporate card expenses, and ERP entries against pattern recognition algorithms to prevent fraud.`,
+        benefit: 'Catches duplicate billings and anomalous payment routings immediately.'
       }
     ];
   }

@@ -9,7 +9,9 @@ export type ToolCategory =
   | 'Productivity & Notes'
   | 'SEO & Marketing'
   | 'Design & 3D'
-  | 'Research & Data';
+  | 'Research & Data'
+  | 'Legal AI'
+  | 'Finance AI';
 
 export type PricingType = 'All' | 'Free' | 'Freemium' | 'Paid' | 'Open Source';
 
@@ -47,4 +49,21 @@ export interface ReviewSubmission {
   pricing: string;
   description: string;
   email: string;
+}
+
+export type ContactCategory =
+  | 'General Inquiry'
+  | 'Report a Bug / Issue'
+  | 'Review Correction / Update'
+  | 'Suggest a New AI Tool'
+  | 'Partnership & Sponsorship'
+  | 'Editorial Feedback';
+
+export interface ContactFormData {
+  name: string;
+  email: string;
+  category: ContactCategory;
+  subject?: string;
+  message: string;
+  toolContext?: string;
 }

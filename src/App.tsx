@@ -16,6 +16,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { AI_TOOLS_DATA } from './data/tools';
+import { getEnterpriseAITools } from './data/scalableDatabase';
 import { AITool, ToolCategory, PricingType } from './types';
 import { filterAndRankTools, POPULAR_SEARCH_TERMS } from './utils/search';
 import { Navbar } from './components/Navbar';
@@ -39,6 +40,8 @@ const CATEGORIES: ToolCategory[] = [
   'SEO & Marketing',
   'Design & 3D',
   'Research & Data',
+  'Legal AI',
+  'Finance AI',
 ];
 
 const INITIAL_VISIBLE_COUNT = 24;
@@ -50,6 +53,9 @@ type RouteState =
   | { view: 'tool'; toolId: string };
 
 export default function App() {
+  // Load scalable database of 10,000+ AI tools
+  const allTools = useMemo(() => getEnterpriseAITools(), []);
+
   // Hash-based client-side routing
   const [route, setRoute] = useState<RouteState>(() => {
     if (typeof window !== 'undefined' && window.location.hash.startsWith('#/tool/')) {
@@ -76,7 +82,7 @@ export default function App() {
       const hash = window.location.hash;
       if (hash.startsWith('#/tool/')) {
         const toolId = hash.replace('#/tool/', '').trim();
-        const found = AI_TOOLS_DATA.find((t) => t.id === toolId);
+        const found = allTools.find((t) => t.id === toolId);
         if (found) {
           setRoute({ view: 'tool', toolId });
           return;
@@ -87,19 +93,19 @@ export default function App() {
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  }, [allTools]);
 
   // Sync document title and meta tag based on current view
   useEffect(() => {
     if (route.view === 'tool') {
-      const tool = AI_TOOLS_DATA.find((t) => t.id === route.toolId);
+      const tool = allTools.find((t) => t.id === route.toolId);
       if (tool) {
         document.title = `${tool.name} Review (2026) - Features, Pricing & Alternatives | AuraGenix AI`;
         return;
       }
     }
-    document.title = 'AuraGenix AI — Discover & Compare the Best AI Tools of 2026';
-  }, [route]);
+    document.title = 'AuraGenix AI — Discover & Compare 10,000+ Best AI Tools of 2026';
+  }, [route, allTools]);
 
   // Navigation handlers
   const navigateToTool = (toolId: string) => {
@@ -160,21 +166,21 @@ export default function App() {
   // Find currently active tool if in detail view
   const activeTool = useMemo(() => {
     if (route.view === 'tool') {
-      return AI_TOOLS_DATA.find((t) => t.id === route.toolId) || null;
+      return allTools.find((t) => t.id === route.toolId) || null;
     }
     return null;
-  }, [route]);
+  }, [route, allTools]);
 
   // Filtered and sorted tools for the home view with multi-token real-time narrowing & relevance ranking
   const filteredTools = useMemo(() => {
     return filterAndRankTools(
-      AI_TOOLS_DATA,
+      allTools,
       searchQuery,
       activeCategory,
       pricingFilter,
       sortOption
     );
-  }, [searchQuery, activeCategory, pricingFilter, sortOption]);
+  }, [allTools, searchQuery, activeCategory, pricingFilter, sortOption]);
 
   // Reset pagination when search query, category, or pricing changes
   const handleSearchChange = (query: string) => {
@@ -218,7 +224,7 @@ export default function App() {
       {route.view === 'tool' && activeTool ? (
         <ToolDetailPage
           tool={activeTool}
-          allTools={AI_TOOLS_DATA}
+          allTools={allTools}
           onBackToHome={() => navigateToHome('tools-grid')}
           onSelectAlternative={navigateToTool}
           onSelectCategory={navigateToCategory}
@@ -234,7 +240,7 @@ export default function App() {
             onCategorySelect={handleCategorySelect}
             categories={CATEGORIES}
             totalResults={filteredTools.length}
-            allTools={AI_TOOLS_DATA}
+            allTools={allTools}
             onSelectTool={(tool) => navigateToTool(tool.id)}
             onViewAllResults={() => {
               const grid = document.getElementById('tools-grid');
@@ -614,7 +620,7 @@ export default function App() {
                 </h2>
               </div>
               <a href="#tools-grid" className="text-xs font-semibold text-cyan-400 hover:underline mt-2 sm:mt-0 flex items-center gap-1">
-                <span>View all 1,000 tool reviews</span>
+                <span>Explore all {allTools.length.toLocaleString()}+ tool reviews</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </a>
             </div>

@@ -5,6 +5,7 @@ interface NavbarProps {
   onSubmitToolClick: () => void;
   onNavigateHome?: (sectionId?: string) => void;
   onSearchClick?: () => void;
+  onContactClick?: () => void;
   currentView?: 'home' | 'tool';
 }
 
@@ -12,6 +13,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSubmitToolClick, 
   onNavigateHome,
   onSearchClick,
+  onContactClick,
   currentView = 'home' 
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -92,6 +94,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="nav-blog"
             >
               Blog
+            </button>
+            <button
+              onClick={() => {
+                if (onContactClick) {
+                  onContactClick();
+                } else {
+                  handleNavClick('contact-section');
+                }
+              }}
+              className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer flex items-center gap-1.5"
+              id="nav-contact"
+            >
+              <span>Contact</span>
             </button>
           </nav>
 
@@ -176,6 +191,19 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
           >
             Blog
+          </button>
+          <button
+            onClick={() => {
+              setMobileMenuOpen(false);
+              if (onContactClick) {
+                onContactClick();
+              } else {
+                handleNavClick('contact-section');
+              }
+            }}
+            className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
+          >
+            Contact &amp; Report Issue
           </button>
           <div className="pt-2">
             <button

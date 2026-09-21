@@ -13,7 +13,9 @@ import {
   Layers, 
   SearchCheck, 
   Box, 
-  Database 
+  Database,
+  Scale,
+  Landmark 
 } from 'lucide-react';
 import { AITool, ToolCategory } from '../types';
 import { HighlightMatch } from './HighlightMatch';
@@ -77,6 +79,16 @@ const getCategoryTheme = (category: Exclude<ToolCategory, 'All'>) => {
       return {
         bg: 'from-cyan-600/20 to-teal-600/20 border-cyan-500/30 text-cyan-300',
         icon: Database
+      };
+    case 'Legal AI':
+      return {
+        bg: 'from-amber-600/20 to-yellow-600/20 border-amber-500/30 text-amber-300',
+        icon: Scale
+      };
+    case 'Finance AI':
+      return {
+        bg: 'from-emerald-600/20 to-green-600/20 border-emerald-500/30 text-emerald-300',
+        icon: Landmark
       };
     default:
       return {

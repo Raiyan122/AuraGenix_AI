@@ -32,9 +32,12 @@ import {
   SearchCheck,
   Box,
   Database,
+  Scale,
+  Landmark,
   SlidersHorizontal,
   Flame,
-  CheckCheck
+  CheckCheck,
+  Flag
 } from 'lucide-react';
 import { AITool, ToolCategory } from '../types';
 import { 
@@ -52,6 +55,7 @@ interface ToolDetailPageProps {
   onBackToHome: () => void;
   onSelectAlternative: (toolId: string) => void;
   onSelectCategory: (category: ToolCategory) => void;
+  onReportIssue?: (toolName: string, toolId: string) => void;
 }
 
 // Category visual helper
@@ -67,6 +71,8 @@ const getCategoryIcon = (category: ToolCategory) => {
     case 'SEO & Marketing': return SearchCheck;
     case 'Design & 3D': return Box;
     case 'Research & Data': return Database;
+    case 'Legal AI': return Scale;
+    case 'Finance AI': return Landmark;
     default: return Cpu;
   }
 };
