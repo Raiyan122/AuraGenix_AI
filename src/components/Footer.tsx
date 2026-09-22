@@ -35,9 +35,22 @@ export const Footer: React.FC<FooterProps> = ({
           {/* Brand col */}
           <div className="md:col-span-1 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 p-[1px]">
-                <div className="w-full h-full bg-[#090d1b] rounded-[11px] flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-cyan-400" />
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 p-[1px] overflow-hidden flex-shrink-0">
+                <div className="w-full h-full bg-[#090d1b] rounded-[11px] overflow-hidden flex items-center justify-center">
+                  <img 
+                    src="/logo.png" 
+                    alt="AuraGenix AI Logo" 
+                    className="w-full h-full object-cover object-center"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                  <div className="w-full h-full hidden items-center justify-center">
+                    <Sparkles className="w-5 h-5 text-cyan-400" />
+                  </div>
                 </div>
               </div>
               <span className="text-xl font-extrabold tracking-tight text-white">
