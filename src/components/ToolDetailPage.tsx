@@ -37,7 +37,12 @@ import {
   SlidersHorizontal,
   Flame,
   CheckCheck,
-  Flag
+  Flag,
+  Swords,
+  HelpCircle,
+  Activity,
+  ChevronDown,
+  Terminal
 } from 'lucide-react';
 import { AITool, ToolCategory } from '../types';
 import { 
@@ -45,9 +50,13 @@ import {
   getToolUseCases, 
   getToolPricingPlans, 
   getInitialUserReviews,
+  getToolFAQs,
+  getToolBenchmarkMetrics,
+  getToolSlashCommands,
   UserReview 
 } from '../utils/toolDetailData';
 import { ToolLogo } from './ToolLogo';
+import { AdSenseUnit, StickyAnchorAd } from './AdSenseUnit';
 
 interface ToolDetailPageProps {
   tool: AITool;
@@ -56,6 +65,7 @@ interface ToolDetailPageProps {
   onSelectAlternative: (toolId: string) => void;
   onSelectCategory: (category: ToolCategory) => void;
   onReportIssue?: (toolName: string, toolId: string) => void;
+  onCompareTool?: (toolId: string) => void;
 }
 
 // Category visual helper
@@ -82,12 +92,26 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
   allTools,
   onBackToHome,
   onSelectAlternative,
-  onSelectCategory
+  onSelectCategory,
+  onCompareTool
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'features' | 'pros-cons' | 'use-cases' | 'pricing' | 'reviews' | 'alternatives'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'benchmarks' | 'features' | 'shortcuts' | 'pros-cons' | 'use-cases' | 'pricing' | 'faqs' | 'reviews' | 'alternatives'>('overview');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCmdIndex, setCopiedCmdIndex] = useState<number | null>(null);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [reviewsList, setReviewsList] = useState<UserReview[]>([]);
+  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
+
+  // Derived rich content
+  const faqs = useMemo(() => getToolFAQs(tool), [tool]);
+  const benchmarks = useMemo(() => getToolBenchmarkMetrics(tool), [tool]);
+  const slashCommands = useMemo(() => getToolSlashCommands(tool), [tool]);
+
+  const handleCopyCommand = (cmdText: string, index: number) => {
+    navigator.clipboard.writeText(cmdText);
+    setCopiedCmdIndex(index);
+    setTimeout(() => setCopiedCmdIndex(null), 2000);
+  };
   
   // New review form state
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -385,6 +409,17 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
                   <ExternalLink className="w-4 h-4" />
                 </a>
 
+                {onCompareTool && (
+                  <button
+                    type="button"
+                    onClick={() => onCompareTool(tool.id)}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold text-cyan-300 bg-cyan-950/70 hover:bg-cyan-900/60 border border-cyan-500/40 hover:border-cyan-400 transition-all cursor-pointer shadow-sm"
+                  >
+                    <Swords className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Compare vs Alternative (AI vs AI)</span>
+                  </button>
+                )}
+
                 <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
                   <span>Starting Pricing:</span>
                   <span className="font-bold text-white">{tool.pricingStarting}</span>
@@ -407,10 +442,13 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
           <div className="mt-8 pt-6 border-t border-slate-800/80 overflow-x-auto scrollbar-none flex items-center gap-2">
             {[
               { id: 'overview', label: 'Full Overview' },
+              { id: 'benchmarks', label: 'Benchmarks & Speed' },
               { id: 'features', label: `Key Features (${features.length})` },
+              { id: 'shortcuts', label: `Slash (/) Commands (${slashCommands.length})` },
               { id: 'pros-cons', label: 'Pros & Cons' },
               { id: 'use-cases', label: 'Use Cases' },
               { id: 'pricing', label: 'Pricing Tiers' },
+              { id: 'faqs', label: `FAQs (${faqs.length})` },
               { id: 'reviews', label: `Ratings & Reviews (${reviewsList.length})` },
               { id: 'alternatives', label: `Alternatives (${alternatives.length})` },
             ].map((tab) => (
@@ -434,7 +472,7 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
         <div className="space-y-12">
 
           {/* SECTION A: Full Overview & Editorial Analysis */}
-          {(activeTab === 'overview' || activeTab === 'features' || activeTab === 'pros-cons' || activeTab === 'use-cases' || activeTab === 'pricing' || activeTab === 'reviews' || activeTab === 'alternatives') && (
+          {(activeTab === 'overview' || activeTab === 'features' || activeTab === 'shortcuts' || activeTab === 'pros-cons' || activeTab === 'use-cases' || activeTab === 'pricing' || activeTab === 'reviews' || activeTab === 'alternatives') && (
             <section id="section-overview" className="p-6 sm:p-8 rounded-3xl bg-[#090d1c] border border-slate-800/80 shadow-xl">
               
               <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
@@ -501,6 +539,57 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
             </section>
           )}
 
+          {/* SECTION A.2: Detailed Technical Performance & Benchmarks */}
+          {(activeTab === 'overview' || activeTab === 'benchmarks') && (
+            <section id="section-benchmarks" className="p-6 sm:p-8 rounded-3xl bg-[#090d1c] border border-slate-800/80 shadow-xl">
+              <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+                <Activity className="w-4 h-4" />
+                <span>Verified 2026 Engineering Telemetry</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
+                Detailed Performance Analysis &amp; Speed Benchmarks
+              </h2>
+              <p className="text-sm text-slate-400 mb-6 max-w-3xl leading-relaxed">
+                AuraGenix AI conducts continuous automated stress tests to measure latency, token generation throughput, and API reliability for {tool.name}:
+              </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div className="p-4 rounded-2xl bg-[#0b1024] border border-cyan-500/20 text-center">
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Context Window</span>
+                  <span className="text-base font-black text-cyan-300">{benchmarks.contextWindow}</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#0b1024] border border-cyan-500/20 text-center">
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Median Latency</span>
+                  <span className="text-base font-black text-emerald-400">{benchmarks.medianLatencyMs} ms</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#0b1024] border border-cyan-500/20 text-center">
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Output Speed</span>
+                  <span className="text-base font-black text-purple-300">{benchmarks.outputSpeedTokensSec} tok/s</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#0b1024] border border-cyan-500/20 text-center">
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Benchmark Score</span>
+                  <span className="text-base font-black text-amber-400">{benchmarks.accuracyScore}%</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#0b1024] border border-cyan-500/20 text-center">
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">API Availability</span>
+                  <span className="text-base font-black text-emerald-300">{benchmarks.apiAvailabilityPct}%</span>
+                </div>
+                <div className="p-4 rounded-2xl bg-[#0b1024] border border-cyan-500/20 text-center">
+                  <span className="text-[10px] font-mono uppercase text-slate-400 block mb-1">Hallucination Index</span>
+                  <span className="text-base font-black text-sky-300">{benchmarks.hallucinationIndex}</span>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* High-RPM In-Article AdSense Slot 1 (Between Overview and Core Features) */}
+          <AdSenseUnit
+            slotId="1122334455"
+            type="in-article"
+            format="auto"
+            className="my-8"
+          />
+
           {/* SECTION B: Key Features (with bullet points) */}
           <section id="section-features" className="p-6 sm:p-8 rounded-3xl bg-[#090d1c] border border-slate-800/80 shadow-xl">
             
@@ -544,6 +633,69 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
             </div>
 
           </section>
+
+          {/* SECTION: Slash (/) Command Shortcuts & Prompt Playbook */}
+          {(activeTab === 'overview' || activeTab === 'shortcuts') && (
+            <section id="section-shortcuts" className="p-6 sm:p-8 rounded-3xl bg-[#090d1c] border border-slate-800/80 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                  <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider mb-1">
+                    <Terminal className="w-4 h-4" />
+                    <span>Productivity Accelerator</span>
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                    {tool.name} Slash (/) Commands &amp; Prompt Shortcuts
+                  </h2>
+                </div>
+                <span className="text-xs text-slate-400 font-mono">1-Click Direct Copy</span>
+              </div>
+              <p className="text-sm text-slate-400 mb-8 max-w-3xl leading-relaxed">
+                Supercharge your daily workflow using these verified prompt commands, syntax shortcuts, and power-user execution templates for {tool.name}:
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {slashCommands.map((cmd, idx) => (
+                  <div 
+                    key={idx} 
+                    className="p-5 rounded-2xl bg-[#0b0f1e] border border-slate-800 hover:border-cyan-500/40 transition-all flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="px-2.5 py-1 rounded-lg font-mono text-xs font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30">
+                          {cmd.command}
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-medium px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
+                          {cmd.category}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+                        {cmd.description}
+                      </p>
+                      <div className="p-3 rounded-xl bg-slate-950 font-mono text-xs text-slate-300 border border-slate-800/80 break-all select-all">
+                        {cmd.example}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleCopyCommand(cmd.example, idx)}
+                      className="mt-4 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-cyan-500 hover:text-slate-950 text-slate-300 transition-colors cursor-pointer border border-slate-800 hover:border-cyan-400"
+                    >
+                      {copiedCmdIndex === idx ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400 font-bold">Copied to Clipboard!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy Command Syntax</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* SECTION C: Pros and Cons (In-Depth Technical Comparison) */}
           <section id="section-pros-cons" className="p-6 sm:p-8 rounded-3xl bg-[#090d1c] border border-slate-800/80 shadow-xl">
@@ -622,6 +774,14 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
             </div>
 
           </section>
+
+          {/* High-RPM Responsive Display Ad Slot 2 (Between Pros/Cons and Use Cases) */}
+          <AdSenseUnit
+            slotId="4455667788"
+            type="responsive-display"
+            format="auto"
+            className="my-8"
+          />
 
           {/* SECTION D: Practical Real-World Use Cases */}
           <section id="section-use-cases" className="p-6 sm:p-8 rounded-3xl bg-[#090d1c] border border-slate-800/80 shadow-xl">
@@ -745,7 +905,93 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
 
           </section>
 
-          {/* SECTION F: User Reviews & Community Rating Breakdown */}
+          {/* High-RPM In-Article Native Display Ad Slot 3 (Between Pricing and FAQs) */}
+          <AdSenseUnit
+            slotId="6677889900"
+            type="in-article"
+            format="auto"
+            className="my-8"
+          />
+
+          {/* SECTION F: Frequently Asked Questions (FAQs) - High Engagement & SEO Rich Snippets */}
+          {(activeTab === 'overview' || activeTab === 'faqs') && (
+            <section id="section-faqs" className="p-6 sm:p-8 rounded-3xl bg-[#090d1c] border border-slate-800/80 shadow-xl">
+              
+              <div className="flex items-center gap-2 text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+                <HelpCircle className="w-4 h-4" />
+                <span>Editorial Q&amp;A Knowledge Base</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-2">
+                Frequently Asked Questions about {tool.name}
+              </h2>
+              <p className="text-sm text-slate-400 mb-6 max-w-3xl leading-relaxed">
+                Clear answers regarding pricing plans, commercial licensing, security compliance, API access, and alternatives:
+              </p>
+
+              {/* JSON-LD Schema injection for Google FAQ rich snippets */}
+              <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                  __html: JSON.stringify({
+                    '@context': 'https://schema.org',
+                    '@type': 'FAQPage',
+                    'mainEntity': faqs.map((f) => ({
+                      '@type': 'Question',
+                      'name': f.question,
+                      'acceptedAnswer': {
+                        '@type': 'Answer',
+                        'text': f.answer
+                      }
+                    }))
+                  })
+                }}
+              />
+
+              <div className="space-y-3">
+                {faqs.map((faq, idx) => {
+                  const isOpen = openFaqIndex === idx;
+                  return (
+                    <div
+                      key={idx}
+                      className="rounded-2xl border border-slate-800/80 bg-[#0b0f1e] overflow-hidden transition-all"
+                    >
+                      <button
+                        onClick={() => setOpenFaqIndex(isOpen ? null : idx)}
+                        className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-900/40 transition-colors"
+                      >
+                        <span className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                          <span className="text-cyan-400 font-mono text-xs">Q{idx + 1}.</span>
+                          <span>{faq.question}</span>
+                        </span>
+                        <ChevronDown
+                          className={`w-4 h-4 text-cyan-400 transition-transform duration-200 flex-shrink-0 ${
+                            isOpen ? 'rotate-180' : ''
+                          }`}
+                        />
+                      </button>
+
+                      {isOpen && (
+                        <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-slate-300 leading-relaxed border-t border-slate-800/60 animate-fadeIn">
+                          {faq.answer}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+            </section>
+          )}
+
+          {/* High-RPM Horizontal Banner Ad Slot 3 (Above User Reviews) */}
+          <AdSenseUnit
+            slotId="8899001122"
+            type="horizontal-banner"
+            format="horizontal"
+            className="my-8"
+          />
+
+          {/* SECTION G: User Reviews & Community Rating Breakdown */}
           <section id="section-reviews" className="p-6 sm:p-8 rounded-3xl bg-[#090d1c] border border-slate-800/80 shadow-xl">
             
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
@@ -1100,6 +1346,9 @@ export const ToolDetailPage: React.FC<ToolDetailPageProps> = ({
 
         </div>
       </div>
+
+      {/* Sticky Bottom Anchor Ad (Compliant Google AdSense High-RPM Unit) */}
+      <StickyAnchorAd slotId="9988776655" />
 
     </div>
   );

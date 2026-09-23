@@ -1,6 +1,6 @@
 import React from 'react';
 import { Zap, ShieldCheck, Star, Award, TrendingUp } from 'lucide-react';
-import { AITool, ToolCategory } from '../types';
+import { AITool, ToolCategory, PricingType } from '../types';
 import { SearchBarWithSuggestions } from './SearchBarWithSuggestions';
 
 interface HeroProps {
@@ -13,6 +13,11 @@ interface HeroProps {
   allTools: AITool[];
   onSelectTool?: (tool: AITool) => void;
   onViewAllResults?: () => void;
+  onSelectPricing?: (pricing: PricingType) => void;
+  onOpenCompare?: () => void;
+  onNavigateDeals?: () => void;
+  onNavigateNews?: () => void;
+  onResetFilters?: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({
@@ -25,6 +30,11 @@ export const Hero: React.FC<HeroProps> = ({
   allTools,
   onSelectTool,
   onViewAllResults,
+  onSelectPricing,
+  onOpenCompare,
+  onNavigateDeals,
+  onNavigateNews,
+  onResetFilters,
 }) => {
   return (
     <section id="hero" className="relative pt-12 pb-16 md:pt-20 md:pb-24 overflow-hidden">
@@ -55,7 +65,7 @@ export const Hero: React.FC<HeroProps> = ({
           Cut through the hype with unbiased performance benchmarks, verified pricing tiers, and deep-dive technical reviews designed for modern builders, creators, and US teams.
         </p>
 
-        {/* Real-time Search Bar with Instant Live Auto-Suggestions Dropdown */}
+        {/* Real-time Search Bar with Instant Live Auto-Suggestions Dropdown & Slash Commands */}
         <div className="mb-8">
           <SearchBarWithSuggestions
             searchQuery={searchQuery}
@@ -64,6 +74,12 @@ export const Hero: React.FC<HeroProps> = ({
             totalResults={totalResults}
             onSelectTool={onSelectTool}
             onViewAllResults={onViewAllResults}
+            onSelectCategory={onCategorySelect}
+            onSelectPricing={onSelectPricing}
+            onOpenCompare={onOpenCompare}
+            onNavigateDeals={onNavigateDeals}
+            onNavigateNews={onNavigateNews}
+            onResetFilters={onResetFilters}
           />
         </div>
 

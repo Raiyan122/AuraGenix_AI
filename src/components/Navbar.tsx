@@ -1,22 +1,59 @@
-import React, { useState } from 'react';
-import { Sparkles, PlusCircle, Menu, X, Search } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Sparkles, PlusCircle, Menu, X, Search, Swords, Tag, Radio, ChevronDown, Layers } from 'lucide-react';
+import { ToolCategory } from '../types';
+import { categoryToSlug } from '../utils/categoryUtils';
 
 interface NavbarProps {
   onSubmitToolClick: () => void;
   onNavigateHome?: (sectionId?: string) => void;
   onSearchClick?: () => void;
   onContactClick?: () => void;
-  currentView?: 'home' | 'tool';
+  onCompareClick?: () => void;
+  onDealsClick?: () => void;
+  onNewsClick?: () => void;
+  onCategoryClick?: (category: ToolCategory) => void;
+  currentView?: 'home' | 'tool' | 'deals' | 'news' | 'compare' | 'category';
 }
+
+const NAV_CATEGORIES: ToolCategory[] = [
+  'Chatbots & Assistants',
+  'Coding & Dev',
+  'Copywriting & Content',
+  'Image Generation',
+  'Video Generation',
+  'Audio & Music',
+  'Productivity & Notes',
+  'SEO & Marketing',
+  'Design & 3D',
+  'Research & Data',
+  'Legal AI',
+  'Finance AI'
+];
 
 export const Navbar: React.FC<NavbarProps> = ({ 
   onSubmitToolClick, 
   onNavigateHome,
   onSearchClick,
   onContactClick,
+  onCompareClick,
+  onDealsClick,
+  onNewsClick,
+  onCategoryClick,
   currentView = 'home' 
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setCategoriesOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, []);
 
   const handleNavClick = (sectionId: string) => {
     setMobileMenuOpen(false);
@@ -72,43 +109,129 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {/* Desktop Navigation links on the right */}
-          <nav className="hidden md:flex items-center gap-8">
-            <button
-              onClick={() => handleNavClick('hero')}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-7">
+            <a
+              href="#/"
+              onClick={(e) => {
+                e.preventDefault();
+                handleNavClick('hero');
+              }}
               className={`text-sm font-medium transition-colors cursor-pointer ${
                 currentView === 'home' ? 'text-cyan-400 font-semibold' : 'text-slate-300 hover:text-cyan-400'
               }`}
               id="nav-home"
             >
-              Directory Home
-            </button>
-            <button
-              onClick={() => handleNavClick('tools-grid')}
-              className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
-              id="nav-top-tools"
-            >
-              Top AI Tools
-            </button>
-            <button
-              onClick={() => handleNavClick('categories-section')}
-              className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
-              id="nav-categories"
-            >
-              Categories
-            </button>
+              Directory
+            </a>
+
+            {/* AI vs AI Comparison Mode */}
+            {onCompareClick && (
+              <a
+                href="#/compare"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onCompareClick();
+                }}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-cyan-300 hover:text-white transition-colors cursor-pointer"
+                id="nav-compare-btn"
+              >
+                <Swords className="w-3.5 h-3.5 text-cyan-400" />
+                <span>AI vs AI</span>
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-cyan-950 text-cyan-400 border border-cyan-500/30">
+                  Versus
+                </span>
+              </a>
+            )}
+
+            {/* Daily Deals & Discounts */}
+            {onDealsClick && (
+              <a
+                href="#/deals"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onDealsClick();
+                }}
+                className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors cursor-pointer ${
+                  currentView === 'deals' ? 'text-amber-400 font-bold' : 'text-slate-300 hover:text-amber-300'
+                }`}
+                id="nav-deals-btn"
+              >
+                <Tag className="w-3.5 h-3.5 text-amber-400" />
+                <span>Deals</span>
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-amber-950/80 text-amber-300 border border-amber-500/30">
+                  -50%
+                </span>
+              </a>
+            )}
+
+            {/* Trending AI News Feed */}
+            {onNewsClick && (
+              <a
+                href="#/news"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onNewsClick();
+                }}
+                className={`inline-flex items-center gap-1.5 text-sm font-medium transition-colors cursor-pointer ${
+                  currentView === 'news' ? 'text-cyan-400 font-bold' : 'text-slate-300 hover:text-cyan-400'
+                }`}
+                id="nav-news-btn"
+              >
+                <Radio className="w-3.5 h-3.5 text-cyan-400" />
+                <span>News Radar</span>
+              </a>
+            )}
+
+            {/* Categories Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => setCategoriesOpen(!categoriesOpen)}
+                className={`inline-flex items-center gap-1 text-sm font-medium transition-colors cursor-pointer ${
+                  currentView === 'category' || categoriesOpen ? 'text-cyan-400 font-semibold' : 'text-slate-300 hover:text-cyan-400'
+                }`}
+                id="nav-categories"
+              >
+                <span>Categories</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${categoriesOpen ? 'rotate-180 text-cyan-400' : ''}`} />
+              </button>
+
+              {categoriesOpen && (
+                <div className="absolute top-full left-0 mt-3 w-64 p-2 bg-[#090d1f] border border-slate-800 rounded-2xl shadow-2xl z-50 animate-in fade-in-50 zoom-in-95 duration-150">
+                  <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold border-b border-slate-800/80 mb-1">
+                    Explore Dedicated Categories
+                  </div>
+                  <div className="max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-800 py-1 space-y-0.5">
+                    {NAV_CATEGORIES.map((cat) => (
+                      <a
+                        key={cat}
+                        href={`#/category/${categoryToSlug(cat)}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setCategoriesOpen(false);
+                          if (onCategoryClick) {
+                            onCategoryClick(cat);
+                          } else {
+                            window.location.hash = `#/category/${categoryToSlug(cat)}`;
+                          }
+                        }}
+                        className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-cyan-300 hover:bg-slate-800/70 transition-colors flex items-center justify-between group cursor-pointer"
+                      >
+                        <span className="truncate">{cat}</span>
+                        <ChevronDown className="w-3 h-3 text-slate-600 -rotate-90 group-hover:text-cyan-400 transition-colors flex-shrink-0" />
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => handleNavClick('pricing-guide')}
               className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
               id="nav-pricing"
             >
               Pricing
-            </button>
-            <button
-              onClick={() => handleNavClick('ai-insights')}
-              className="text-sm font-medium text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
-              id="nav-blog"
-            >
-              Blog
             </button>
             <button
               onClick={() => {
@@ -183,18 +306,87 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             Directory Home
           </button>
-          <button
-            onClick={() => handleNavClick('tools-grid')}
-            className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
+
+          {onCompareClick && (
+            <a
+              href="#/compare"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                onCompareClick();
+              }}
+              className="flex items-center gap-2 w-full text-left py-2 text-sm font-semibold text-cyan-300 hover:text-white cursor-pointer"
+            >
+              <Swords className="w-4 h-4 text-cyan-400" />
+              <span>AI vs AI Comparison (Versus Mode)</span>
+            </a>
+          )}
+
+          {onDealsClick && (
+            <a
+              href="#/deals"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                onDealsClick();
+              }}
+              className="flex items-center gap-2 w-full text-left py-2 text-sm font-semibold text-amber-300 hover:text-white cursor-pointer"
+            >
+              <Tag className="w-4 h-4 text-amber-400" />
+              <span>Daily AI Deals &amp; Discounts (-50%)</span>
+            </a>
+          )}
+
+          {onNewsClick && (
+            <a
+              href="#/news"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                onNewsClick();
+              }}
+              className="flex items-center gap-2 w-full text-left py-2 text-sm font-semibold text-cyan-300 hover:text-white cursor-pointer"
+            >
+              <Radio className="w-4 h-4 text-cyan-400" />
+              <span>Trending AI News Radar</span>
+            </a>
+          )}
+
+          <a
+            href="#/tools-grid"
+            onClick={(e) => {
+              e.preventDefault();
+              handleNavClick('tools-grid');
+            }}
+            className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400 cursor-pointer"
           >
             Top AI Tools
-          </button>
-          <button
-            onClick={() => handleNavClick('categories-section')}
-            className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"
-          >
-            Categories
-          </button>
+          </a>
+          <div className="py-2 border-y border-slate-800/80 my-1">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 block mb-2 font-bold">
+              AI Categories
+            </span>
+            <div className="grid grid-cols-2 gap-1.5">
+              {NAV_CATEGORIES.map((cat) => (
+                <a
+                  key={cat}
+                  href={`#/category/${categoryToSlug(cat)}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setMobileMenuOpen(false);
+                    if (onCategoryClick) {
+                      onCategoryClick(cat);
+                    } else {
+                      window.location.hash = `#/category/${categoryToSlug(cat)}`;
+                    }
+                  }}
+                  className="text-left text-xs py-1.5 px-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 hover:text-cyan-300 truncate cursor-pointer"
+                >
+                  {cat}
+                </a>
+              ))}
+            </div>
+          </div>
           <button
             onClick={() => handleNavClick('pricing-guide')}
             className="block w-full text-left py-2 text-sm font-medium text-slate-300 hover:text-cyan-400"

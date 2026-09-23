@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getGoogleFaviconUrl, getDuckDuckGoFaviconUrl, getToolInitials } from '../utils/logoUtils';
+import { getOfficialLogoUrl } from '../utils/brandLogos';
 
 interface ToolLogoProps {
   toolName: string;
@@ -16,20 +17,25 @@ export const ToolLogo: React.FC<ToolLogoProps> = ({
   size = 'md',
   className = '',
 }) => {
-  // Candidate image URLs to try in order
-  const primaryUrl = customLogoUrl || getGoogleFaviconUrl(websiteUrl, 128);
-  const fallbackUrl = getDuckDuckGoFaviconUrl(websiteUrl);
+  // Ordered sequence of logo source attempts
+  const officialUrl = getOfficialLogoUrl(toolName, websiteUrl, customLogoUrl);
+  const googleFaviconUrl = getGoogleFaviconUrl(websiteUrl, 128);
+  const duckDuckGoUrl = getDuckDuckGoFaviconUrl(websiteUrl);
 
-  const [currentSrc, setCurrentSrc] = useState<string>(primaryUrl);
-  const [hasError, setHasError] = useState<boolean>(false);
-  const [triedFallback, setTriedFallback] = useState<boolean>(false);
+  // Attempt tiers: 0 = official brand/vector, 1 = domain favicon, 2 = fallback service, 3 = monogram
+  const [attemptIndex, setAttemptIndex] = useState<number>(0);
 
-  // Sync state if website or custom logo changes
+  // Deduplicate candidate URLs to ensure crisp transitions and avoid redundant retries
+  const candidateUrls = Array.from(
+    new Set([officialUrl, customLogoUrl, googleFaviconUrl, duckDuckGoUrl].filter(Boolean) as string[])
+  );
+
   useEffect(() => {
-    setCurrentSrc(customLogoUrl || getGoogleFaviconUrl(websiteUrl, 128));
-    setHasError(false);
-    setTriedFallback(false);
-  }, [websiteUrl, customLogoUrl]);
+    setAttemptIndex(0);
+  }, [websiteUrl, customLogoUrl, toolName]);
+
+  const currentSrc = candidateUrls[attemptIndex] || null;
+  const isFailed = attemptIndex >= candidateUrls.length || !currentSrc;
 
   const initials = getToolInitials(toolName);
 
@@ -58,24 +64,19 @@ export const ToolLogo: React.FC<ToolLogoProps> = ({
   }[size];
 
   const handleError = () => {
-    if (!triedFallback && fallbackUrl && currentSrc !== fallbackUrl) {
-      setTriedFallback(true);
-      setCurrentSrc(fallbackUrl);
-    } else {
-      setHasError(true);
-    }
+    setAttemptIndex((prev) => prev + 1);
   };
 
   return (
     <div
-      className={`relative flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/80 shadow-md overflow-hidden ${sizeStyles.container} ${className}`}
+      className={`relative flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-slate-900 to-[#0b1022] border border-slate-700/70 shadow-md overflow-hidden ${sizeStyles.container} ${className}`}
       title={`${toolName} official logo`}
     >
-      {!hasError && currentSrc ? (
+      {!isFailed && currentSrc ? (
         <img
           src={currentSrc}
           alt={`${toolName} logo`}
-          className={`${sizeStyles.image} object-contain p-0.5 bg-white/5 transition-transform duration-200 group-hover:scale-105`}
+          className={`${sizeStyles.image} object-contain p-0.5 bg-white/[0.04] transition-transform duration-200 group-hover:scale-105`}
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={handleError}
@@ -92,3 +93,4 @@ export const ToolLogo: React.FC<ToolLogoProps> = ({
     </div>
   );
 };
+

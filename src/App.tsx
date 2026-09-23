@@ -27,6 +27,13 @@ import { ReviewModal } from './components/ReviewModal';
 import { SubmitToolModal } from './components/SubmitToolModal';
 import { InfoModals } from './components/InfoModals';
 import { Footer } from './components/Footer';
+import { AIComparisonModal } from './components/AIComparisonModal';
+import { DailyAIDeals } from './components/DailyAIDeals';
+import { TrendingAINews } from './components/TrendingAINews';
+import { CategoryPage } from './components/CategoryPage';
+import { AdSenseUnit, StickyAnchorAd } from './components/AdSenseUnit';
+import { Swords, Tag, Radio } from 'lucide-react';
+import { categoryToSlug, slugToCategory } from './utils/categoryUtils';
 
 const CATEGORIES: ToolCategory[] = [
   'All',
@@ -50,20 +57,63 @@ const PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
 
 type RouteState = 
   | { view: 'home' }
-  | { view: 'tool'; toolId: string };
+  | { view: 'tool'; toolId: string }
+  | { view: 'category'; category: ToolCategory }
+  | { view: 'deals' }
+  | { view: 'news' };
+
+// Multi-Page Dynamic Route Parser (Supports both clean path and hash formats)
+function parseCurrentRoute(allTools: AITool[]): RouteState {
+  if (typeof window === 'undefined') return { view: 'home' };
+
+  const pathname = window.location.pathname;
+  const hash = window.location.hash;
+
+  // 1. Check pathname (e.g., /tool/[tool-name] or /category/[category-name])
+  if (pathname.startsWith('/tool/')) {
+    const toolId = pathname.replace('/tool/', '').replace(/\/$/, '').trim();
+    if (toolId && allTools.some((t) => t.id === toolId)) {
+      return { view: 'tool', toolId };
+    }
+  } else if (pathname.startsWith('/category/')) {
+    const slug = pathname.replace('/category/', '').replace(/\/$/, '').trim();
+    const cat = slugToCategory(slug);
+    if (cat && cat !== 'All') {
+      return { view: 'category', category: cat };
+    }
+  } else if (pathname === '/deals' || pathname === '/deals/') {
+    return { view: 'deals' };
+  } else if (pathname === '/news' || pathname === '/news/') {
+    return { view: 'news' };
+  }
+
+  // 2. Check hash (e.g., #/tool/[tool-name] or #/category/[category-name])
+  if (hash.startsWith('#/tool/')) {
+    const toolId = hash.replace('#/tool/', '').replace(/\/$/, '').trim();
+    if (toolId && allTools.some((t) => t.id === toolId)) {
+      return { view: 'tool', toolId };
+    }
+  } else if (hash.startsWith('#/category/')) {
+    const slug = hash.replace('#/category/', '').replace(/\/$/, '').trim();
+    const cat = slugToCategory(slug);
+    if (cat && cat !== 'All') {
+      return { view: 'category', category: cat };
+    }
+  } else if (hash === '#/deals') {
+    return { view: 'deals' };
+  } else if (hash === '#/news') {
+    return { view: 'news' };
+  }
+
+  return { view: 'home' };
+}
 
 export default function App() {
   // Load scalable database of 10,000+ AI tools
   const allTools = useMemo(() => getEnterpriseAITools(), []);
 
-  // Hash-based client-side routing
-  const [route, setRoute] = useState<RouteState>(() => {
-    if (typeof window !== 'undefined' && window.location.hash.startsWith('#/tool/')) {
-      const toolId = window.location.hash.replace('#/tool/', '').trim();
-      if (toolId) return { view: 'tool', toolId };
-    }
-    return { view: 'home' };
-  });
+  // Multi-page dynamic routing state
+  const [route, setRoute] = useState<RouteState>(() => parseCurrentRoute(getEnterpriseAITools()));
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<ToolCategory>('All');
@@ -75,36 +125,58 @@ export default function App() {
   const [selectedTool, setSelectedTool] = useState<AITool | null>(null);
   const [isSubmitOpen, setIsSubmitOpen] = useState(false);
   const [infoModalType, setInfoModalType] = useState<'privacy' | 'terms' | 'contact' | null>(null);
+  
+  // AI vs AI Comparison modal state
+  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
+  const [compareToolAId, setCompareToolAId] = useState<string | undefined>('chatgpt');
+  const [compareToolBId, setCompareToolBId] = useState<string | undefined>('claude');
 
-  // Sync hash changes (Back / Forward browser buttons and bookmarks)
+  // Sync hash and popstate changes (Native Back / Forward browser buttons, tabs and bookmarks)
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash.startsWith('#/tool/')) {
-        const toolId = hash.replace('#/tool/', '').trim();
-        const found = allTools.find((t) => t.id === toolId);
-        if (found) {
-          setRoute({ view: 'tool', toolId });
-          return;
-        }
-      }
-      setRoute({ view: 'home' });
+    const handleUrlChange = () => {
+      const parsed = parseCurrentRoute(allTools);
+      setRoute(parsed);
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    window.addEventListener('popstate', handleUrlChange);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlChange);
+      window.removeEventListener('popstate', handleUrlChange);
+    };
   }, [allTools]);
 
-  // Sync document title and meta tag based on current view
+  // Sync document title, meta description, and SEO canonical tag based on current sub-page
   useEffect(() => {
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+
     if (route.view === 'tool') {
       const tool = allTools.find((t) => t.id === route.toolId);
       if (tool) {
         document.title = `${tool.name} Review (2026) - Features, Pricing & Alternatives | AuraGenix AI`;
+        canonical.href = `https://auragenixai.cyou/tool/${tool.id}`;
         return;
       }
+    } else if (route.view === 'category') {
+      document.title = `${route.category} AI Tools (2026) — Verified Reviews & Benchmarks | AuraGenix AI`;
+      canonical.href = `https://auragenixai.cyou/category/${categoryToSlug(route.category)}`;
+      return;
+    } else if (route.view === 'deals') {
+      document.title = 'Daily AI Deals & Promo Codes (2026) — Verified Discounts | AuraGenix AI';
+      canonical.href = 'https://auragenixai.cyou/deals';
+      return;
+    } else if (route.view === 'news') {
+      document.title = 'Trending AI News Radar (2026) — Model Releases & Benchmarks | AuraGenix AI';
+      canonical.href = 'https://auragenixai.cyou/news';
+      return;
     }
     document.title = 'AuraGenix AI — Discover & Compare 10,000+ Best AI Tools of 2026';
+    canonical.href = 'https://auragenixai.cyou/';
   }, [route, allTools]);
 
   // Navigation handlers
@@ -112,6 +184,24 @@ export default function App() {
     window.location.hash = `#/tool/${toolId}`;
     setRoute({ view: 'tool', toolId });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const navigateToDeals = () => {
+    window.location.hash = '#/deals';
+    setRoute({ view: 'deals' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const navigateToNews = () => {
+    window.location.hash = '#/news';
+    setRoute({ view: 'news' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openCompareModal = (toolAId?: string, toolBId?: string) => {
+    if (toolAId) setCompareToolAId(toolAId);
+    if (toolBId) setCompareToolBId(toolBId);
+    setIsCompareModalOpen(true);
   };
 
   const navigateToHome = (sectionId?: string) => {
@@ -128,8 +218,14 @@ export default function App() {
   };
 
   const navigateToCategory = (category: ToolCategory) => {
-    setActiveCategory(category);
-    navigateToHome('tools-grid');
+    if (category === 'All') {
+      navigateToHome('tools-grid');
+      return;
+    }
+    const slug = categoryToSlug(category);
+    window.location.hash = `#/category/${slug}`;
+    setRoute({ view: 'category', category });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const focusSearch = () => {
@@ -189,8 +285,12 @@ export default function App() {
   };
 
   const handleCategorySelect = (category: ToolCategory) => {
-    setActiveCategory(category);
-    setVisibleCount(INITIAL_VISIBLE_COUNT);
+    if (category === 'All') {
+      setActiveCategory('All');
+      setVisibleCount(INITIAL_VISIBLE_COUNT);
+    } else {
+      navigateToCategory(category);
+    }
   };
 
   const handlePricingSelect = (pricing: PricingType) => {
@@ -217,17 +317,35 @@ export default function App() {
         onSubmitToolClick={() => setIsSubmitOpen(true)} 
         onNavigateHome={navigateToHome}
         onSearchClick={focusSearch}
+        onCompareClick={() => openCompareModal()}
+        onDealsClick={navigateToDeals}
+        onNewsClick={navigateToNews}
+        onCategoryClick={navigateToCategory}
         currentView={route.view}
       />
 
       {/* 2. DYNAMIC VIEW SWITCHING */}
-      {route.view === 'tool' && activeTool ? (
+      {route.view === 'deals' ? (
+        <DailyAIDeals onBackToHome={() => navigateToHome()} />
+      ) : route.view === 'news' ? (
+        <TrendingAINews onBackToHome={() => navigateToHome()} />
+      ) : route.view === 'category' ? (
+        <CategoryPage
+          category={route.category}
+          allTools={allTools}
+          onSelectTool={navigateToTool}
+          onBackToHome={() => navigateToHome()}
+          onSelectCategory={navigateToCategory}
+          onCompareTools={(toolAId, toolBId) => openCompareModal(toolAId, toolBId)}
+        />
+      ) : route.view === 'tool' && activeTool ? (
         <ToolDetailPage
           tool={activeTool}
           allTools={allTools}
           onBackToHome={() => navigateToHome('tools-grid')}
           onSelectAlternative={navigateToTool}
           onSelectCategory={navigateToCategory}
+          onCompareTool={(toolId) => openCompareModal(toolId)}
         />
       ) : (
         <main className="flex-grow">
@@ -246,7 +364,134 @@ export default function App() {
               const grid = document.getElementById('tools-grid');
               if (grid) grid.scrollIntoView({ behavior: 'smooth' });
             }}
+            onSelectPricing={(pricing) => setPricingFilter(pricing)}
+            onOpenCompare={() => openCompareModal()}
+            onNavigateDeals={navigateToDeals}
+            onNavigateNews={navigateToNews}
+            onResetFilters={() => {
+              setSearchQuery('');
+              setActiveCategory('All');
+              setPricingFilter('All');
+            }}
           />
+
+          {/* Quick-Access Feature Showcase Strip (Versus Mode + Deals + News Radar) */}
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              {/* Card 1: Versus Mode */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#0c1228] to-[#080d1e] border border-cyan-500/30 hover:border-cyan-400/60 shadow-lg transition-all group">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+                    <Swords className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-950 text-cyan-400 border border-cyan-500/30 font-bold">
+                    Interactive
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">
+                  AI vs AI Comparison Engine
+                </h3>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  Head-to-head architectural showdowns with feature matrices, pricing, pros/cons &amp; verified verdicts.
+                </p>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  <button
+                    onClick={() => openCompareModal('chatgpt', 'claude')}
+                    className="text-[11px] font-semibold text-slate-300 hover:text-cyan-300 bg-slate-900 px-2 py-1 rounded-md border border-slate-800 hover:border-cyan-500/40 transition-colors"
+                  >
+                    ChatGPT vs Claude
+                  </button>
+                  <button
+                    onClick={() => openCompareModal('midjourney-v6', 'flux-1-pro')}
+                    className="text-[11px] font-semibold text-slate-300 hover:text-cyan-300 bg-slate-900 px-2 py-1 rounded-md border border-slate-800 hover:border-cyan-500/40 transition-colors"
+                  >
+                    Midjourney vs Flux
+                  </button>
+                  <button
+                    onClick={() => openCompareModal('cursor-ai', 'github-copilot')}
+                    className="text-[11px] font-semibold text-slate-300 hover:text-cyan-300 bg-slate-900 px-2 py-1 rounded-md border border-slate-800 hover:border-cyan-500/40 transition-colors"
+                  >
+                    Cursor vs Copilot
+                  </button>
+                </div>
+                <button
+                  onClick={() => openCompareModal()}
+                  className="w-full py-2 rounded-xl text-xs font-bold text-slate-950 bg-cyan-400 hover:bg-cyan-300 transition-colors flex items-center justify-center gap-1.5 shadow"
+                >
+                  <Swords className="w-3.5 h-3.5" />
+                  <span>Launch Versus Comparison</span>
+                </button>
+              </div>
+
+              {/* Card 2: Daily AI Deals */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#161009] to-[#0c0d18] border border-amber-500/30 hover:border-amber-400/60 shadow-lg transition-all group">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                    <Tag className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-amber-950 text-amber-400 border border-amber-500/30 font-bold">
+                    Up to 50% Off
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white mb-1 group-hover:text-amber-300 transition-colors">
+                  Daily AI Deals &amp; Discounts
+                </h3>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  Verified coupons, lifetime access offers, and exclusive educational promo codes for top AI platforms.
+                </p>
+                <div className="text-xs text-amber-400 font-semibold mb-4 bg-amber-950/40 p-2 rounded-lg border border-amber-500/20 flex items-center gap-2">
+                  <span>🔥 Featured: 30% Off Perplexity Pro with code</span>
+                  <span className="font-mono bg-amber-950 px-1.5 py-0.5 rounded border border-amber-500/30">AURAGENIX30</span>
+                </div>
+                <button
+                  onClick={navigateToDeals}
+                  className="w-full py-2 rounded-xl text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 transition-colors flex items-center justify-center gap-1.5 shadow"
+                >
+                  <Tag className="w-3.5 h-3.5" />
+                  <span>Browse All Verified Deals</span>
+                </button>
+              </div>
+
+              {/* Card 3: Trending AI News */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-[#0c1228] to-[#080d1e] border border-purple-500/30 hover:border-purple-400/60 shadow-lg transition-all group">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                    <Radio className="w-5 h-5" />
+                  </div>
+                  <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-500/30 font-bold">
+                    Live Telemetry
+                  </span>
+                </div>
+                <h3 className="text-base font-bold text-white mb-1 group-hover:text-purple-300 transition-colors">
+                  Trending AI News &amp; Benchmarks
+                </h3>
+                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                  Daily curated intelligence on LLM releases, benchmark shifts, regulatory updates, and breakthrough models.
+                </p>
+                <div className="text-xs text-slate-300 mb-4 space-y-1">
+                  <div className="truncate">• Anthropic Claude 3.7 Sonnet Hybrid Reasoning</div>
+                  <div className="truncate">• DeepSeek V3 Math &amp; Code Open Weights</div>
+                </div>
+                <button
+                  onClick={navigateToNews}
+                  className="w-full py-2 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-500 transition-colors flex items-center justify-center gap-1.5 shadow"
+                >
+                  <Radio className="w-3.5 h-3.5" />
+                  <span>Read Trending AI Radar</span>
+                </button>
+              </div>
+
+            </div>
+
+            {/* High-RPM Responsive AdSense Unit on Homepage */}
+            <AdSenseUnit
+              slotId="5566778899"
+              type="responsive-display"
+              format="auto"
+              className="mt-8"
+            />
+          </section>
 
           {/* 3. AI Tool Grid Section */}
           <section id="tools-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -359,6 +604,7 @@ export default function App() {
                       key={tool.id}
                       tool={tool}
                       onReadReview={(t) => navigateToTool(t.id)}
+                      onCompare={(t) => openCompareModal(t.id)}
                       searchQuery={searchQuery}
                     />
                   ))}
@@ -731,6 +977,21 @@ export default function App() {
         type={infoModalType}
         onClose={() => setInfoModalType(null)}
       />
+
+      {/* AI vs AI Comparison Modal (Versus Mode) */}
+      <AIComparisonModal
+        isOpen={isCompareModalOpen}
+        onClose={() => setIsCompareModalOpen(false)}
+        allTools={allTools}
+        initialToolAId={compareToolAId}
+        initialToolBId={compareToolBId}
+        onSelectToolDetail={navigateToTool}
+      />
+
+      {/* Bottom Sticky Anchor Ad on Home View */}
+      {route.view === 'home' && (
+        <StickyAnchorAd slotId="3322114455" />
+      )}
 
     </div>
   );

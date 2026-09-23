@@ -20,10 +20,12 @@ import {
 import { AITool, ToolCategory } from '../types';
 import { HighlightMatch } from './HighlightMatch';
 import { ToolLogo } from './ToolLogo';
+import { Swords } from 'lucide-react';
 
 interface ToolCardProps {
   tool: AITool;
   onReadReview: (tool: AITool) => void;
+  onCompare?: (tool: AITool) => void;
   searchQuery?: string;
 }
 
@@ -107,7 +109,7 @@ const getToolInitials = (name: string) => {
   return name.slice(0, 2).toUpperCase();
 };
 
-export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview, searchQuery }) => {
+export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview, onCompare, searchQuery }) => {
   const theme = getCategoryTheme(tool.category);
   const IconComponent = theme.icon;
   const initials = getToolInitials(tool.name);
@@ -140,13 +142,22 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview, searchQu
 
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
-                  {searchQuery ? (
-                    <HighlightMatch text={tool.name} query={searchQuery} />
-                  ) : (
-                    tool.name
-                  )}
-                </h3>
+                <a
+                  href={`#/tool/${tool.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onReadReview(tool);
+                  }}
+                  className="hover:underline focus:outline-none"
+                >
+                  <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-cyan-300 transition-colors">
+                    {searchQuery ? (
+                      <HighlightMatch text={tool.name} query={searchQuery} />
+                    ) : (
+                      tool.name
+                    )}
+                  </h3>
+                </a>
                 {tool.badge && (
                   <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 rounded-full">
                     {tool.badge}
@@ -217,9 +228,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview, searchQu
           ))}
         </div>
 
-        {/* Key Pro bullet */}
+        {/* Key Pro bullet / Quick Summary Highlight */}
         {tool.pros.length > 0 && (
-          <div className="flex items-start gap-2 text-xs text-slate-300 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/70">
+          <div className="flex items-start gap-2 text-xs text-slate-300 bg-slate-900/50 p-2.5 rounded-lg border border-slate-800/70 mb-1">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
             <span className="line-clamp-1">{tool.pros[0]}</span>
           </div>
@@ -227,32 +238,52 @@ export const ToolCard: React.FC<ToolCardProps> = ({ tool, onReadReview, searchQu
 
       </div>
 
-      {/* Card Footer: Action Buttons */}
-      <div className="p-6 pt-0 border-t border-slate-800/80 mt-auto flex items-center justify-between gap-3">
-        <a
-          href={tool.websiteUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-cyan-300 transition-colors py-2"
-          title={`Visit ${tool.name} official website`}
-        >
-          <span>Visit site</span>
-          <ExternalLink className="w-3.5 h-3.5" />
-        </a>
+      {/* Card Footer: Action Buttons (Tier 2 Gateway) */}
+      <div className="p-6 pt-3 border-t border-slate-800/80 mt-auto flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <a
+            href={tool.websiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-cyan-300 transition-colors py-2"
+            title={`Visit ${tool.name} official website`}
+          >
+            <span>Visit site</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
 
-        {/* Read Full Review Button */}
-        <button
+          {onCompare && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCompare(tool);
+              }}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-cyan-300 py-1 px-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-cyan-500/30 transition-all cursor-pointer"
+              title={`Compare ${tool.name} with another AI tool`}
+            >
+              <Swords className="w-3 h-3 text-cyan-400" />
+              <span>VS</span>
+            </button>
+          )}
+        </div>
+
+        {/* Prominent View Detailed Guide / Read In-Depth Review Button */}
+        <a
+          href={`#/tool/${tool.id}`}
           onClick={(e) => {
             e.stopPropagation();
+            e.preventDefault();
             onReadReview(tool);
           }}
           id={`read-review-btn-${tool.id}`}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-slate-800/90 hover:bg-gradient-to-r hover:from-cyan-500 hover:to-purple-600 border border-slate-700 hover:border-cyan-400/50 rounded-xl transition-all cursor-pointer shadow-sm hover:shadow-cyan-500/20 group/btn"
+          className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 border border-cyan-400/40 rounded-xl transition-all cursor-pointer shadow-md shadow-cyan-500/20 hover:shadow-cyan-500/40 group/btn"
+          title={`Open detailed guide & in-depth review for ${tool.name}`}
         >
-          <span>Read In-Depth Review</span>
-          <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-        </button>
+          <span>View Detailed Guide</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+        </a>
       </div>
 
     </article>

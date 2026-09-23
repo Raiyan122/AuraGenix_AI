@@ -74,12 +74,12 @@ export const Footer: React.FC<FooterProps> = ({
               Explore Categories
             </h4>
             <ul className="space-y-2.5 text-xs text-slate-400">
-              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Coding &amp; LLM IDEs</a></li>
-              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Generative Video &amp; VFX</a></li>
-              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Legal AI &amp; Contracts</a></li>
-              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Finance AI &amp; Quant Alpha</a></li>
-              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">Photorealistic Image Gen</a></li>
-              <li><a href="#tools-grid" className="hover:text-cyan-300 transition-colors">SEO &amp; Growth Intelligence</a></li>
+              <li><a href="#/category/coding-dev" className="hover:text-cyan-300 transition-colors">Coding &amp; LLM IDEs</a></li>
+              <li><a href="#/category/video-generation" className="hover:text-cyan-300 transition-colors">Generative Video &amp; VFX</a></li>
+              <li><a href="#/category/legal-ai" className="hover:text-cyan-300 transition-colors">Legal AI &amp; Contracts</a></li>
+              <li><a href="#/category/finance-ai" className="hover:text-cyan-300 transition-colors">Finance AI &amp; Quant Alpha</a></li>
+              <li><a href="#/category/image-generation" className="hover:text-cyan-300 transition-colors">Photorealistic Image Gen</a></li>
+              <li><a href="#/category/seo-marketing" className="hover:text-cyan-300 transition-colors">SEO &amp; Growth Intelligence</a></li>
             </ul>
           </div>
 
