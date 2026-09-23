@@ -1,5 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+/**
+ * Global monetization switch for AuraGenix AI.
+ * Set to `false` during Google AdSense review/approval phase to hide all empty frames,
+ * placeholders, and "SPONSORED" labels.
+ * Set to `true` once Google AdSense officially approves your account and ads start serving.
+ */
+export const ADS_ENABLED = false;
+
 export type AdSlotType = 'in-article' | 'responsive-display' | 'horizontal-banner' | 'sidebar-sticky' | 'sticky-anchor';
 
 interface AdSenseUnitProps {
@@ -23,8 +31,13 @@ export const AdSenseUnit: React.FC<AdSenseUnitProps> = ({
   type = 'responsive-display',
   layoutKey,
   className = '',
-  showPlaceholderFallback = true,
+  showPlaceholderFallback = false,
 }) => {
+  // If ads are disabled (pending review), render nothing to prevent empty/broken ad frames
+  if (!ADS_ENABLED) {
+    return null;
+  }
+
   const adRef = useRef<HTMLModElement | null>(null);
   const [adLoaded, setAdLoaded] = useState(false);
   const [adError, setAdError] = useState(false);
@@ -97,7 +110,7 @@ export const AdSenseUnit: React.FC<AdSenseUnitProps> = ({
 export const StickyAnchorAd: React.FC<{ slotId?: string }> = ({ slotId = '9876543210' }) => {
   const [closed, setClosed] = useState(false);
 
-  if (closed) return null;
+  if (!ADS_ENABLED || closed) return null;
 
   return (
     <aside 

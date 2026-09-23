@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { ADS_ENABLED } from './AdSenseUnit';
 
 export interface BannerAdConfig {
   label: string;
@@ -109,6 +110,10 @@ const SingleBannerAdSlot: React.FC<{ ad: BannerAdConfig; index: number }> = ({ a
 };
 
 export const ReviewBannerAdGrid: React.FC<ReviewBannerAdGridProps> = ({ className = '' }) => {
+  if (!ADS_ENABLED) {
+    return null;
+  }
+
   return (
     <div
       className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 ${className}`}

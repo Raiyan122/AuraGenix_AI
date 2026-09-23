@@ -31,7 +31,7 @@ import { AIComparisonModal } from './components/AIComparisonModal';
 import { DailyAIDeals } from './components/DailyAIDeals';
 import { TrendingAINews } from './components/TrendingAINews';
 import { CategoryPage } from './components/CategoryPage';
-import { AdSenseUnit, StickyAnchorAd } from './components/AdSenseUnit';
+import { AdSenseUnit, StickyAnchorAd, ADS_ENABLED } from './components/AdSenseUnit';
 import { ReviewBannerAdGrid } from './components/ReviewBannerAdGrid';
 import { Swords, Tag, Radio } from 'lucide-react';
 import { categoryToSlug, slugToCategory } from './utils/categoryUtils';
@@ -485,13 +485,15 @@ export default function App() {
 
             </div>
 
-            {/* High-RPM Responsive AdSense Unit on Homepage */}
-            <AdSenseUnit
-              slotId="5566778899"
-              type="responsive-display"
-              format="auto"
-              className="mt-8"
-            />
+            {/* High-RPM Responsive AdSense Unit on Homepage (Hidden pending AdSense review) */}
+            {ADS_ENABLED && (
+              <AdSenseUnit
+                slotId="5566778899"
+                type="responsive-display"
+                format="auto"
+                className="mt-8"
+              />
+            )}
           </section>
 
           {/* 3. AI Tool Grid Section */}
@@ -801,10 +803,12 @@ export default function App() {
 
               </div>
 
-              {/* 4-Banner Grid Layout right below the benchmark evaluation section */}
-              <div className="mt-12 pt-8 border-t border-slate-800/60">
-                <ReviewBannerAdGrid />
-              </div>
+              {/* 4-Banner Grid Layout right below the benchmark evaluation section (Hidden pending AdSense review) */}
+              {ADS_ENABLED && (
+                <div className="mt-12 pt-8 border-t border-slate-800/60">
+                  <ReviewBannerAdGrid />
+                </div>
+              )}
 
             </div>
           </section>
@@ -994,8 +998,8 @@ export default function App() {
         onSelectToolDetail={navigateToTool}
       />
 
-      {/* Bottom Sticky Anchor Ad on Home View */}
-      {route.view === 'home' && (
+      {/* Bottom Sticky Anchor Ad on Home View (Hidden pending AdSense review) */}
+      {ADS_ENABLED && route.view === 'home' && (
         <StickyAnchorAd slotId="3322114455" />
       )}
 

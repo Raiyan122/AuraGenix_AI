@@ -20,7 +20,7 @@ import {
 import { AITool, ToolCategory, PricingType } from '../types';
 import { categoryToSlug, CATEGORY_DETAILS } from '../utils/categoryUtils';
 import { ToolCard } from './ToolCard';
-import { AdSenseUnit, StickyAnchorAd } from './AdSenseUnit';
+import { AdSenseUnit, StickyAnchorAd, ADS_ENABLED } from './AdSenseUnit';
 
 interface CategoryPageProps {
   category: ToolCategory;
@@ -237,14 +237,16 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
         </div>
       </div>
 
-      {/* 2. Responsive Display AdSense Slot */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-        <AdSenseUnit
-          slotId="4455667788"
-          type="responsive-display"
-          format="auto"
-        />
-      </div>
+      {/* 2. Responsive Display AdSense Slot (Hidden pending AdSense approval) */}
+      {ADS_ENABLED && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+          <AdSenseUnit
+            slotId="4455667788"
+            type="responsive-display"
+            format="auto"
+          />
+        </div>
+      )}
 
       {/* 3. Main Catalog Section with Sub-filters */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
@@ -337,14 +339,16 @@ export const CategoryPage: React.FC<CategoryPageProps> = ({
           </div>
         )}
 
-        {/* 4. In-Article AdSense Unit */}
-        <div className="my-12">
-          <AdSenseUnit
-            slotId="2233445566"
-            type="in-article"
-            className="my-4"
-          />
-        </div>
+        {/* 4. In-Article AdSense Unit (Hidden pending AdSense approval) */}
+        {ADS_ENABLED && (
+          <div className="my-12">
+            <AdSenseUnit
+              slotId="2233445566"
+              type="in-article"
+              className="my-4"
+            />
+          </div>
+        )}
 
         {/* 5. Category Comparison Table */}
         {topComparisonTools.length >= 2 && (
