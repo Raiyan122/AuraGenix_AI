@@ -32,6 +32,7 @@ import { DailyAIDeals } from './components/DailyAIDeals';
 import { TrendingAINews } from './components/TrendingAINews';
 import { CategoryPage } from './components/CategoryPage';
 import { AdSenseUnit, StickyAnchorAd } from './components/AdSenseUnit';
+import { ReviewBannerAdGrid } from './components/ReviewBannerAdGrid';
 import { Swords, Tag, Radio } from 'lucide-react';
 import { categoryToSlug, slugToCategory } from './utils/categoryUtils';
 
@@ -798,6 +799,11 @@ export default function App() {
                   </p>
                 </div>
 
+              </div>
+
+              {/* 4-Banner Grid Layout right below the benchmark evaluation section */}
+              <div className="mt-12 pt-8 border-t border-slate-800/60">
+                <ReviewBannerAdGrid />
               </div>
 
             </div>
